@@ -39,7 +39,7 @@ class Ticker:
 		url = self.PAGE_URLS[page_type]
 		resp = requests.get(url, params=self.params)
 		if resp.status_code != 200:
-			self.text = ''			
+			self.text[page_type] = ''			
 		self.text[page_type] = resp.text
 		return self
 	
@@ -81,14 +81,16 @@ class Ticker:
 		q = bs(self.text['profile'])
 		
 		list = q.findAll(attrs={"id": "yfs_l84_" + self.ticker.lower()})
-		price = unicode(list[0].findAll(text=True)[0])
+		if(list): # ugly
+			price = unicode(list[0].findAll(text=True)[0])
 		
-		list = q.findAll(attrs={"id": "yfs_t53_" + self.ticker.lower()})
-		date = unicode(list[0].findAll(text=True)[0])
-		
-		d = {'price': price, 'date': date, 'parse_date': time.strftime('%y-%m-%d')}
-		df = pd.DataFrame(d, index=['0'])
-		self.data['profile']['price'] = df
+			list = q.findAll(attrs={"id": "yfs_t53_" + self.ticker.lower()})
+			if(list):
+				date = unicode(list[0].findAll(text=True)[0])
+				
+				d = {'price': price, 'date': date, 'parse_date': time.strftime('%y-%m-%d')}
+				df = pd.DataFrame(d, index=['0'])
+				self.data['profile']['price'] = df
 		
 		list = q.findAll(attrs={"class": "yfnc_datamodoutline1"})
 		
@@ -191,10 +193,10 @@ class Ticker:
 path = '\\'.join([os.getcwd(),time.strftime('%y-%m-%d')])
 if not os.path.exists(path): os.makedirs(path)
 
-tickersFile = csv.reader(open('e:\BME\Szakdolgozat\Yahoo Ticker Symbols - Jan 2015.csv'))
+tickersFile = csv.reader(open('e:\BME\Szakdolgozat\Yahoo Ticker Symbols - Jan 2015.csv')) # origin: http://investexcel.net/all-yahoo-finance-stock-tickers/
 tickersFile.next() # Fejléc eldobása
 
-CNT = 0 # 0 ready 
+CNT = 0 # 0 ready
 CNT_START = 0
 CNT_MAX = 100
 for t in tickersFile:
